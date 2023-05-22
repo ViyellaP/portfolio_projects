@@ -1,4 +1,4 @@
-# Hi
+
 -- This creates the table containing data from each month --
 
 CREATE TABLE 202302feb(
