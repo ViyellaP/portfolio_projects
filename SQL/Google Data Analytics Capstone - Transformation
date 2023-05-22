@@ -1,6 +1,6 @@
 ***This creates the table containing data from each month***
 
-CREATE TABLE 202302feb(
+'''CREATE TABLE 202302feb(
 	rideid VARCHAR(255) PRIMARY KEY,
     rideable_type TEXT,
     started_at  TEXT,
@@ -15,7 +15,7 @@ CREATE TABLE 202302feb(
     start_lng DOUBLE,
     end_lat DOUBLE,
     eng_lng DOUBLE,
-    member_casual TEXT);
+    member_casual TEXT);'''
     
 -- This imports the data from each csv file 
 
