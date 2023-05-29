@@ -1,0 +1,103 @@
+-- This creates the table
+CREATE TABLE 202203march(
+	rideid VARCHAR(255) PRIMARY KEY,
+    rideable_type TEXT,
+    started_at  TEXT,
+    ended_at TEXT,
+    ride_length TEXT,
+    day_of_the_week TEXT,
+    start_station_name VARCHAR(255),
+    start_station_id TEXT,
+    end_station_name VARCHAR (255),
+    end_station_id TEXT,
+    start_lat DOUBLE,
+    start_lng DOUBLE,
+    end_lat DOUBLE,
+    eng_lng DOUBLE,
+    member_casual TEXT);
+-- This import the data from each csv file  
+LOAD DATA LOCAL INFILE 'C:/Program Files/MySQL/MySQL Server 8.0/data/cleaned_202203_cyclistic_data.csv' INTO TABLE 202203march
+FIELDS TERMINATED BY ','
+LINES TERMINATED BY '\r\n'
+IGNORE 1 LINES;
+-- This converts the text data type to datetime format that is accepted in MySQL
+UPDATE 202302feb
+SET started_at = STR_TO_DATE(started_at, '%m/%d/%Y %H:%i');
+-- This converts the text data type to datetime format 
+UPDATE 202302feb
+SET ended_at = STR_TO_DATE(ended_at, '%m/%d/%Y %H:%i');
+-- This drops the ride_length table that has varying data type that is accepted in MySQL
+ALTER TABLE 202302feb
+DROP ride_length;
+-- This converts the text data type to datetime data type
+ALTER TABLE 202302feb
+MODIFY started_at DATETIME,
+MODIFY ended_at DATETIME;
+-- This creates a working table that compiles all the tables together 
+CREATE TABLE working_table AS (
+	SELECT *
+    FROM(
+		SELECT*
+		FROM 202203march
+		UNION ALL
+        SELECT*
+		FROM 202204april
+		UNION ALL
+        SELECT*
+		FROM 202205may
+		UNION ALL
+        SELECT*
+		FROM 202206june
+		UNION ALL
+        SELECT*
+		FROM 202207july
+		UNION ALL
+        SELECT*
+		FROM 202208august
+		UNION ALL
+        SELECT*
+		FROM 202209sept
+		UNION ALL
+        SELECT*
+		FROM 202210oct
+		UNION ALL
+        SELECT*
+		FROM 202211nov
+		UNION ALL
+        SELECT*
+		FROM 202212dec
+		UNION ALL
+        SELECT*
+		FROM 202301jan
+		UNION ALL
+        SELECT*
+		FROM 202302feb
+	) AS alltables);
+    
+-- This adds a new column that shows the duration of the ride
+ALTER TABLE working_table
+ADD COLUMN ride_length TIME;
+UPDATE working_table
+SET ride_length = TIMEDIFF(ended_at, started_at);
+-- This adds a new column that shows the month 
+ALTER TABLE working_table
+ADD COLUMN month TEXT;
+UPDATE working_table
+SET month = MONTHNAME (started_at)
+-- This adds a new column that calculates the distance travelled using Haversine formula
+ALTER TABLE working_table
+ADD COLUMN distancein_km DOUBLE;
+UPDATE working_table
+SET distancein_km = ROUND(6371 * ACOS(COS(RADIANS(90 - start_lat)) * COS(RADIANS(90 - end_lat)) + SIN(RADIANS(90 - start_lat)) * SIN(RADIANS(90 - end_lat)) * COS(RADIANS(start_lng - eng_lng))), 2);
+-- This delete all values wilth NULL and 0 values in distancein_km to remove outliers
+DELETE
+FROM working_table
+WHERE distancein_km IS NULL;
+DELETE
+FROM working_table
+WHERE distancein_km =0;
+
+
+
+
+
